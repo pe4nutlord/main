@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeanutLord - Personal Website</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const githubUsername = 'pe4nutlord';
+            const repoList = document.querySelector('.repo-list');
+
+            fetch(`https://api.github.com/users/${githubUsername}/repos`)
+                .then(response => response.json())
+                .then(repositories => {
+                    repositories.reverse();
+
+                    repositories.forEach(repo => {
+                        const repoItem = document.createElement('li');
+                        repoItem.innerHTML = `
+                            <div class="repo-container">
+                                <a href="${repo.html_url}" target="_blank">${repo.name}</a>
+                                <p class="repo-description">${repo.description || 'No description available'}</p>
+                            </div>
+                        `;
+                        repoList.appendChild(repoItem);
+                    });
+                })
+                .catch(error => console.error('Error fetching repositories:', error));
+        });
+
+        // Function to handle file upload
+        function uploadFile() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert('Please select a file.');
+        return;
+    }
+
+    // Extract file extension from the original file name
+    const originalFileName = file.name;
+    const fileExtension = originalFileName.split('.').pop();
+
+    // Generate a shorter random name
+    const randomName = `${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 5)}.${fileExtension}`;
+
+    const formData = new FormData();
+    formData.append('file', file, randomName);
+
+    fetch('/upload.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        alert(`File uploaded successfully. Link: ${data}`);
+        const link = document.createElement('a');
+        link.href = data;
+        link.target = '_blank';
+        link.download = randomName; // Set the filename for download
+        link.click();
+    })
+    .catch(error => {
+        console.error('Error uploading file:', error);
+        alert('Error uploading file.');
+    });
+}
+    </script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Peanut</h1>
+            <div class="social-buttons">
+                <a href="https://discord.gg/BECqqpT4" target="_blank" class="button">Discord</a>
+                <a href="https://www.twitter.com/pe4nutlord" target="_blank" class="button">Twitter</a>
+                <a href="https://github.com/pe4nutlord" target="_blank" class="button">GitHub</a>
+            </div>
+        </div>
+    </header>
+    <main>
+        <section class="about">
+            <h2>About Me</h2>
+            <p>Welcome to my personal website. I'm passionate about Java and Python development, and I love making Discord bots. Please feel free to explore my site and connect with me on social media!</p>
+        </section>
+
+        <section class="repositories">
+            <h2>My GitHub Repositories</h2>
+            <ul class="repo-list">
+            </ul>
+        </section>
+
+        <section class="upload-section">
+            <h2>File Upload</h2>
+            <input type="file" id="fileInput" />
+            <button onclick="uploadFile()">Upload</button>
+        </section>
+    </main>
+    <footer>
+        &copy; 2023 PeanutLord
+    </footer>
+</body>
+</html>
